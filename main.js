@@ -115,8 +115,11 @@ healthcheck(callback) {
       * for the callback's errorMessage parameter.
       */
       this.emitOffline();
-      log.error('ServiceNow: Health check failed.'+this.id);
-      callback(error);
+      log.error('ServiceNow: Health check failed. error:'+JSON.stringify(error)+' Id:'+this.id);
+      if(callback){
+          return callback(null,error);
+      }
+      
    } else {
      /**
       * Write this block.
@@ -130,7 +133,10 @@ healthcheck(callback) {
       */
       this.emitOnline();
       log.debug('ServiceNow: Health is good.');
-      callback(result);
+      if(callback){
+          return callback(result,null);
+      } 
+      
    }
  });
 }
