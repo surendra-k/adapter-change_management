@@ -16,8 +16,6 @@ const ServiceNowConnector = require(path.join(__dirname, '/connector.js'));
  */
 const EventEmitter = require('events').EventEmitter;
 
-const propsFilter = ({ number, active, priority, description, work_start, work_end, sys_id}) => ({ number, active, priority, description, work_start, work_end, sys_id })
-
 /**
  * The ServiceNowAdapter class.
  *
@@ -181,24 +179,6 @@ healthcheck(callback) {
 
   /**
    * @memberof ServiceNowAdapter
-   * @method translate
-   * @summary translates to generic response
-   * @description translates external system response to generic response model.
-   *
-   * @param {object} sourceData - data to be transformed.
-   * @returns {object} iresult - translated response 
-   */
-  translate(sourceData) {
-    let iresult = propsFilter(sourceData);
-    iresult.change_ticket_number = iresult.number;
-    delete iresult.number;
-    iresult.change_ticket_key = iresult.sys_id;
-    delete iresult.sys_id;
-    return iresult;
-  }
-
-  /**
-   * @memberof ServiceNowAdapter
    * @method getRecord
    * @summary Get ServiceNow Record
    * @description Retrieves a record from ServiceNow.
@@ -213,23 +193,7 @@ healthcheck(callback) {
      * Note how the object was instantiated in the constructor().
      * get() takes a callback function.
      */
-     this.connector.get((response, error) => {
-         if(response){
-             let results = null;
-             //let responseObj = JSON.parse(response);
-             let respBody = response['body'];
-             if(respBody){
-                 let respBodyObj = JSON.parse(respBody);
-                 results = respBodyObj['result'];
-                 for(let i in results){
-                     results[i]= this.translate(results[i]);
-                 }//for loop end
-
-                 return callback(results, error);
-             }//respBody IF end
-         }
-         return callback(response, error);
-     });
+     this.connector.get(callback);
 
   }
 
@@ -250,19 +214,7 @@ healthcheck(callback) {
      * post() takes a callback function.
      */
 
-     this.connector.post((response, error) => {
-         if(response){
-             //let responseObj = JSON.parse(response);
-             let respBody = response['body'];
-             if(respBody){
-                 let respBodyObj = JSON.parse(respBody);
-                 let result = respBodyObj['result'];
-                 result= this.translate(result);
-                 return callback(result, error);
-             }//respBody IF END
-         }
-         return callback(response, error);
-     });
+     this.connector.post(callback);
 
   }
 }
